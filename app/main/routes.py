@@ -16,8 +16,8 @@ def index():
 # insert data to mysql database via html forms
 @bp.route('/insert', methods=['POST'])
 def insert():
-    form = CallforwardForm()
-    if request.method == 'POST':
+    form = CallforwardForm(request.form)
+    if request.method == 'POST' and form.validate_on_submit():
 #    if form.validate_on_submit():
         fwd = Callforward.query.filter_by(exten=form.exten.data).first()
         if fwd:

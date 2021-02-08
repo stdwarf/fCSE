@@ -1,6 +1,6 @@
 {% extends 'bootstrap/base.html' %}
 {% block title %}
-    {% if title %}{{ title }} - Microblog{% else %}{{ _('Welcome to Microblog') }}{% endif %}
+    <h3>PBX Portal</h3>
 {% endblock %}
 
 {% block navbar %}
@@ -13,7 +13,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="{{ url_for('main.index') }}">Microblog</a>
+                <a class="navbar-brand" href="{{ url_for('main.index') }}">PBX Portal</a>
             </div>
         </div>
     </nav>

@@ -10,7 +10,8 @@ def timeout():
     return dict
 
 class CallforwardForm(FlaskForm):
-    exten = StringField('User', validators=[DataRequired(message='INPUT LOCAL NUMBER')])
+    exten = StringField('User', validators=[DataRequired(message='INPUT LOCAL NUMBER'),
+                    Length(min=4, max=4, message='LENGTH NUMBER: 4')])
     forward_phone = StringField('Mobile', validators=[DataRequired(message='INPUT PHONE NUMBER'),
                     Length(min=11, max=11, message='LENGTH NUMBER: 11')])
     timeout = SelectField('Timeout', choices=timeout(), default=8)
