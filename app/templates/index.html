@@ -33,7 +33,7 @@
 
                 <table class="table table-hover table-striped">
                     <tr>
-                        <th>ID</th>
+{#                        <th>ID</th>#}
                         <th>User</th>
                         <th>Forward_phone</th>
                         <th>Timeout</th>
@@ -41,7 +41,7 @@
                     </tr>
                    {% for row in callforward_data %}
                     <tr>
-                        <td>{{row.id}}</td>
+{#                        <td>{{row.id}}</td>#}
                         <td>{{row.exten}}</td>
                         <td>{{row.forward_phone}}</td>
                         <td>{{row.timeout}}</td>
@@ -61,24 +61,23 @@
          <div class="form-group">
           <label>User:</label>
           <input type="hidden"  name="id" value="{{row.id}}">
-          <input type="number" class="form-control" name="exten" value="{{row.exten}}">
+          <input type="number" size="4" min=1000 max=9999 class="form-control" name="exten" value="{{row.exten}}">
          </div>
          <div class="form-group">
           <label>Forward_phone:</label>
-          <input type="number" class="form-control" name="forward_phone" value="{{row.forward_phone}}">
+          <input type="number" size="11" min=80000000000 max=89999999999 class="form-control" name="forward_phone" value="{{row.forward_phone}}">
          </div>
-         <div class="form-group">
-          <label>Timeout:</label>
-          <input type="number" class="form-control" name="timeout" value="{{row.timeout}}">
+         <div class="col-auto">
+          {{ wtf.form_field(form.timeout) }}
          </div>
-         <div class="form-group">
-          <button class="btn btn-primary" type="submit">Update</button>
          </div>
+            <div class="modal-footer">
+            <button class="btn btn-primary" type="submit">Update</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
         </form>
         </div>
-        <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        </div>
+
       </div>
       </div>
      </div>
@@ -92,13 +91,16 @@
         <div class="modal-header"><h4 class="modal-title">Add Call Forward</h4></div>
     <div class="modal-body">
      <form action="{{url_for('main.insert')}}" method="POST", role="form">
-         {{ form.csrf_token() }}
-      <div class="form-group">
-          {{ wtf.form_field(form.exten, class='form-control',placeholder="User") }}
-      </div>
-      <div class="form-group">
-          {{ wtf.form_field(form.forward_phone, class='form-control',placeholder="Forward_phone") }}
-      </div>
+           {{ form.hidden_tag() }}
+           {{ wtf.form_errors(form, hiddens="only") }}
+     <div class="form-group">
+         <label>User:</label>
+          <input type="number" size="4" min=1000 max=9999 class="form-control" name="exten" value="">
+         </div>
+         <div class="form-group">
+          <label>Forward_phone:</label>
+          <input type="number" size="11" min=80000000000 max=89999999999 class="form-control" name="forward_phone" value="">
+         </div>
       <div class="col-auto">
           {{ wtf.form_field(form.timeout) }}
       </div>

@@ -17,8 +17,8 @@ def index():
 @bp.route('/insert', methods=['POST'])
 def insert():
     form = CallforwardForm(request.form)
-    if request.method == 'POST' and form.validate_on_submit():
-#    if form.validate_on_submit():
+    if request.method == 'POST':
+      if form.validate_on_submit():
         fwd = Callforward.query.filter_by(exten=form.exten.data).first()
         if fwd:
             flash('Callforward exist')
@@ -28,10 +28,12 @@ def insert():
         forward_phone = form.forward_phone.data
         timeout = form.timeout.data
         my_data = Callforward(exten, forward_phone, timeout)
-        print(my_data)
         db.session.add(my_data)
         db.session.commit()
         flash("Callforward Inserted Successfully")
+      else:
+        flash("Wrong insert")
+
     return redirect(url_for('main.index'))
 
 
@@ -40,8 +42,7 @@ def insert():
 def update(id):
     form = CallforwardForm()
     if request.method == 'POST':
-        my_data = Callforward.query.filter_by(id=id).first()
-        print(my_data)
+        my_data = Callforward.query.filter_by(id=id).first_or_404()
         my_data.exten = form.exten.data
         my_data.forward_phone = form.forward_phone.data
         my_data.timeout = form.timeout.data
