@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% import 'bootstrap/wtf.html' as wtf %}
 
-{% block title %} Home {% endblock %}
+{% block title %}
+{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -30,8 +31,9 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}
-
-                <table class="table table-hover table-striped">
+    </div>
+        <table id="sample_data" class="table table-hover table-striped">
+                <thead>
                     <tr>
 {#                        <th>ID</th>#}
                         <th>User</th>
@@ -39,6 +41,8 @@
                         <th>Timeout</th>
                         <th>Action</th>
                     </tr>
+                </thead>
+                <tbody>
                    {% for row in callforward_data %}
                     <tr>
 {#                        <td>{{row.id}}</td>#}
@@ -50,6 +54,8 @@
                             <a href="/delete/{{row.id}}" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Delete ?')">Delete</a>
                         </td>
                     </tr>
+
+
 
      <!-- Modal Edit Employee-->
      <div id="modaledit{{row.id}}" class="modal fade" role="dialog">
@@ -80,12 +86,12 @@
 
       </div>
       </div>
-     </div>
+
      {% endfor %}
-    </table>
-   </div>
+</tbody>
+        </table>
   <!-- Modal Add Employee-->
-  <div id="mymodal" class="modal fade" role="dialog">
+    <div id="mymodal" class="modal fade" role="dialog">
       <div class="modal-dialog">
         <div class="modal-content">
         <div class="modal-header"><h4 class="modal-title">Add Call Forward</h4></div>
@@ -114,5 +120,5 @@
    </div>
    </div>
   </div>
- </div>
+</div>
 {% endblock %}
