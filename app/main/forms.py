@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField
-from wtforms.validators import ValidationError, DataRequired, Length
+from wtforms import SubmitField, SelectField, IntegerField
+from wtforms.validators import  DataRequired,NumberRange
+
 
 def timeout():
     dict={}
@@ -10,9 +11,7 @@ def timeout():
     return dict
 
 class CallforwardForm(FlaskForm):
-    exten = StringField('User', validators=[DataRequired(message='INPUT LOCAL NUMBER'),
-                    Length(min=4, max=4, message='LENGTH NUMBER: 4')])
-    forward_phone = StringField('Mobile', validators=[DataRequired(message='INPUT PHONE NUMBER'),
-                    Length(min=11, max=11, message='LENGTH NUMBER: 11')])
+    exten = IntegerField('User', validators=[DataRequired(), NumberRange(1000, 9999)])
+    forward_phone = IntegerField('Mobile', validators=[DataRequired(), NumberRange(80000000000, 89999999999)])
     timeout = SelectField('Timeout', choices=timeout(), default=8)
     submit = SubmitField('Submit')

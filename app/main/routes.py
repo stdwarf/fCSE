@@ -1,12 +1,45 @@
-from flask import render_template, flash, redirect, url_for, request, app
+import ldap
+import app
+from flask import render_template, flash, redirect, url_for, request, current_app, session
+from flask_login import current_user, login_required
+from datetime import datetime, timedelta
 from app import db
 from app.main.forms import CallforwardForm
 from app.models import Callforward
 from app.main import bp
 
 
+@bp.before_request
+def before_request():
+    if current_user.is_authenticated:
+        current_user.last_login = datetime.utcnow()
+        now = datetime.now()
+        try:
+            last_active = session['last_active']
+            flash(session['last_active'])
+            delta = now - last_active
+            if delta.seconds > current_app.config['SESSION_TIMER_CUSTOM']:
+                session['last_active'] = now
+                return redirect(url_for('auth.logout'))
+        except:
+            pass
+        try:
+            session['last_active'] = now
+        except:
+            pass
+    else:
+        return redirect(url_for('auth.login'))
+
+
+def get_ldap_connection():
+    conn = ldap.initialize(current_app.config['LDAP_PROVIDER_URL'])
+    conn.set_option(ldap.OPT_REFERRALS, 0)
+    return conn
+
+
 @bp.route('/')
 @bp.route('/index')
+@login_required
 def index():
     form = CallforwardForm()
     callforward_data = Callforward.query.order_by(Callforward.exten).all()
@@ -17,8 +50,8 @@ def index():
 @bp.route('/insert', methods=['POST'])
 def insert():
     form = CallforwardForm(request.form)
-    if request.method == 'POST' and form.validate_on_submit():
-#    if form.validate_on_submit():
+    if request.method == 'POST':
+      if form.validate_on_submit():
         fwd = Callforward.query.filter_by(exten=form.exten.data).first()
         if fwd:
             flash('Callforward exist')
@@ -28,10 +61,12 @@ def insert():
         forward_phone = form.forward_phone.data
         timeout = form.timeout.data
         my_data = Callforward(exten, forward_phone, timeout)
-        print(my_data)
         db.session.add(my_data)
         db.session.commit()
         flash("Callforward Inserted Successfully")
+      else:
+        flash("Wrong insert")
+
     return redirect(url_for('main.index'))
 
 
@@ -40,8 +75,7 @@ def insert():
 def update(id):
     form = CallforwardForm()
     if request.method == 'POST':
-        my_data = Callforward.query.filter_by(id=id).first()
-        print(my_data)
+        my_data = Callforward.query.filter_by(id=id).first_or_404()
         my_data.exten = form.exten.data
         my_data.forward_phone = form.forward_phone.data
         my_data.timeout = form.timeout.data
