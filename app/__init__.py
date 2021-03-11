@@ -32,6 +32,9 @@ def create_app(config_class=Config):
     from app.auth import bp as auth_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')
 
+    from app.pbx import bp as pbx_bp
+    app.register_blueprint(pbx_bp, url_prefix='/pbx')
+
     if not app.debug and not app.testing:
         if not os.path.exists('logs'):
             os.mkdir('logs')

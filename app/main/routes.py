@@ -14,6 +14,7 @@ def before_request():
     if current_user.is_authenticated:
         current_user.last_login = datetime.utcnow()
         now = datetime.now()
+        db.session.commit()
         try:
             last_active = session['last_active']
             flash(session['last_active'])
@@ -48,6 +49,7 @@ def index():
 
 # insert data to mysql database via html forms
 @bp.route('/insert', methods=['POST'])
+@login_required
 def insert():
     form = CallforwardForm(request.form)
     if request.method == 'POST':
@@ -72,6 +74,7 @@ def insert():
 
 # update employee
 @bp.route('/update/<id>', methods=['POST'])
+@login_required
 def update(id):
     form = CallforwardForm()
     if request.method == 'POST':
@@ -86,6 +89,7 @@ def update(id):
 
 # delete employee
 @bp.route('/delete/<id>/', methods=['GET', 'POST'])
+@login_required
 def delete(id):
     my_data = Callforward.query.get(id)
     db.session.delete(my_data)
