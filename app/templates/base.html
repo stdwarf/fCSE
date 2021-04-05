@@ -25,6 +25,22 @@ $(document).ready(function(){
             ]
     });
 });
+$(document).ready(function(){
+    var dataTable = $('#sample_data_clid').DataTable( {
+        "paging":   true,
+        "ordering": true,
+        "info":     true,
+        "lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+        "columns": [
+            null,
+            null,
+            null,
+            null,
+            { orderable: false },
+            { orderable: false }
+            ]
+    });
+});
 </script>
     </head>
 
@@ -48,11 +64,17 @@ $(document).ready(function(){
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
                     <li><a href="{{ url_for('main.index') }}">Home</a></li>
+                    <li><a href="{{ url_for('pbx.index') }}">Clid</a></li>
+                    <li><a href="{{ url_for('pbx.exten_index') }}">Exten</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
+
                     {% if current_user.is_anonymous %}
                         <li><a href="{{ url_for('auth.login') }}">Login</a></li>
                     {% else %}
+                        {% if current_user.roles[0].name == 'Admin' %}
+                            <li><a href="{{ url_for('user.user') }}">Admin</a></li>
+                        {% endif %}
                         <li><a class="nav-link" role="button" data-toggle="tooltip" data-html="true"
                                href="{{ url_for('auth.logout') }}"
                                title="{{ current_user.fullname }}

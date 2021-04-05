@@ -1,10 +1,12 @@
+from datetime import datetime
+
 import ldap
 from flask_login import login_user, login_required, logout_user, current_user
 from flask import redirect, render_template, request, flash, current_app, url_for, session
 from werkzeug.urls import url_parse
 from app.auth import bp
 from app.auth.forms import LoginForm
-from app.models import User
+from app.models import User, Role, UserRoles
 from app.main.routes import get_ldap_connection
 from app import db
 
@@ -45,6 +47,7 @@ def login():
             if user is None:
                 u = User(username=username, email=email, fullname=fullname, company=company,
                          title=title)
+                u.roles.append(Role.query.filter_by(name='Operator').first())
                 db.session.add(u)
                 db.session.commit()
             else:
@@ -63,6 +66,7 @@ def login():
             flash('Something happen with login', 'fail')
         else:
             login_user(user, remember=True)
+            session['last_active'] = datetime.now()
             flash('You have successfully logged in.', 'success')
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':

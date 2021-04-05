@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block title %}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <div class="jumbotron p-3">
+        <div class="col md-8">
+
+                <h2 class="display-4">Manage <b >Clid </b>  </h2>
+        </div>
+        <div class="col md-4">
+            {# <button type="button"  class="btn btn-success float-right"
+            data-toggle="modal" data-target="#mymodal">Update CLID</button>#}
+            {# <a href="{{ url_for('pbx.get_clid') }}" class="btn btn-warning btn-xs" onclick="return confirm('Are You Sure To GET_CLID ?')">Update CLID</a>#}
+        </div>
+        </div>
+    </div>
+    <div class="row">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-success alert-dismissable" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="close">
+                        <span aria-hidden="true">x</span>
+                    </button>
+                    {{message}}
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+        <table id="sample_data_clid" class="table table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th>Clid_num</th>
+                        <th>Clid_Name</th>
+                        <th>Fullname</th>
+                        <th>Email</th>
+                        <th>Title</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                   {% for row in clid_data %}
+                    <tr>
+                        <td>{{row.clid_num}}</td>
+                        <td>{{row.clid_name}}</td>
+                        <td>{{row.fullname}}</td>
+                        <td>{{row.email}}</td>
+                        <td>{{row.title}}</td>
+                        <td>
+                            <a href="{{ url_for('pbx.update', id=row.id)}}" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#modaledit{{row.id}}">Edit</a>
+                            <a href="{{ url_for('pbx.delete', id=row.id)}}" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Delete ?')">Delete</a>
+                        </td>
+                    </tr>
+    <!-- Modal Edit Employee-->
+     <div id="modaledit{{row.id}}" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+        <div class="modal-content">
+       <div class="modal-header"><h4 class="modal-title">Update Information</h4></div>
+        <div class="modal-body">
+        <form action="{{url_for('pbx.update', id=row.id)}}" method="POST">
+         <div class="form-group">
+          <label>Clid_Name:</label>
+          <input type="hidden"  name="id" value="{{row.id}}">
+          <input type="text" class="form-control" name="clid_name" value="{{row.clid_name}}">
+         </div>
+         <div class="form-group">
+          <label>Clid_Num:</label>
+          <input type="number" class="form-control" name="clid_num" value="{{row.clid_num}}">
+         </div>
+         <div class="form-group">
+          <label>Email:</label>
+          <input type="text" class="form-control" name="email" value="{{row.email}}">
+         </div>
+         <div class="form-group">
+          <label>Fullname:</label>
+          <input type="text" class="form-control" name="fullname" value="{{row.fullname}}">
+         </div>
+         <div class="form-group">
+          <label>Department:</label>
+          <input type="text" class="form-control" name="department" value="{{row.department}}">
+         </div>
+         <div class="form-group">
+          <label>Division:</label>
+          <input type="text" class="form-control" name="division" value="{{row.division}}">
+         </div>
+         <div class="form-group">
+          <label>Title:</label>
+          <input type="text" class="form-control" name="title" value="{{row.title}}">
+         </div>
+          <div class="form-group">
+          <button class="btn btn-primary" type="submit">Update</button>
+         </div>
+        </form>
+        </div>
+        <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      </div>
+     </div>
+     {% endfor %}
+     </tbody>
+        </table>
+
+   </div>
+
+{% endblock %}
