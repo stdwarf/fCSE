@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, IntegerField, SelectField
 from wtforms.validators import DataRequired, NumberRange
 
-
+#new CLID Class
 class ClidForm(FlaskForm):
     clid_num = IntegerField('Clid_num', validators=[DataRequired(), NumberRange(1000, 99999)])
     clid_name = StringField('Clid_name', validators=[DataRequired()])
