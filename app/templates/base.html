@@ -41,6 +41,19 @@ $(document).ready(function(){
             ]
     });
 });
+
+$(document).on("click", ".alarm_update", function () {
+     var play_file = $(this).data('play_file');
+     var order = $(this).data('order');
+     var active = $(this).data('active');
+     $(".modal-body #play_file").val( play_file );
+     $(".modal-body #order").val( order );
+     if (active=="True") {
+         $(".modal-body #active").prop("checked", true);
+     } else {
+         $(".modal-body #active").prop("checked", false);
+     }
+});
 </script>
     </head>
 
@@ -66,6 +79,7 @@ $(document).ready(function(){
                     <li><a href="{{ url_for('main.index') }}">Home</a></li>
                     <li><a href="{{ url_for('pbx.index') }}">Clid</a></li>
                     <li><a href="{{ url_for('pbx.exten_index') }}">Exten</a></li>
+                    <li><a href="{{ url_for('pbx.alarm_index') }}">Alarm</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
 

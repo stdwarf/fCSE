@@ -99,3 +99,4 @@ def delete(id):
     db.session.commit()
     flash("Callforward Deleted Successfully")
     return redirect(url_for('main.index'))
+

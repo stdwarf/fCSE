@@ -152,6 +152,13 @@ class UserRoles(db.Model):
     role_id = db.Column(db.Integer(), db.ForeignKey('roles.id', ondelete='CASCADE'))
 
 
+class Alarms(db.Model):
+    __tablename__ = 'alarms'
+    id = db.Column(db.Integer, primary_key=True)
+    set_time = db.Column(db.DateTime, default=datetime.utcnow)
+    play_file = db.Column(db.String(80), nullable=False)
+    order = db.Column(db.Integer(), unique=True)
+    active = db.Column(db.Boolean,default=False, nullable=False)
 
 class Ps_auths(db.Model):
     __tablename__ = 'ps_auths'

@@ -1,11 +1,12 @@
+import json
 from datetime import datetime
 
-from flask import render_template, flash, redirect, url_for, request, session, current_app
+from flask import render_template, flash, redirect, url_for, request, session, current_app, jsonify
 from flask_login import current_user, login_required, logout_user
 from app import db, admin_required, operator_required
-from app.models import Clid, Ps_auths, Ps_aors, Ps_endpoints
+from app.models import Clid, Ps_auths, Ps_aors, Ps_endpoints, Alarms
 from app.pbx import bp
-from app.pbx.forms import ClidForm, ExtenForm
+from app.pbx.forms import ClidForm, ExtenForm, AlarmForm
 
 
 @bp.before_request
@@ -40,6 +41,7 @@ def index():
     clid_data = Clid.query.order_by(Clid.clid_num).all()
     return render_template("pbx/clid.html", clid_data=clid_data, form=form)
 
+
 @bp.route('/update/<id>', methods=['POST'])
 @login_required
 @admin_required
@@ -56,6 +58,7 @@ def update(id):
         my_data.title = form.title.data
         my_data.address = form.address.data
         db.session.commit()
+        return jsonify(status='ok')
         flash("CLID Updated Successfully")
         return redirect(url_for('pbx.index'))
 
@@ -108,6 +111,7 @@ def exten_insert():
         db.session.add(auth)
         db.session.add(endp)
         db.session.commit()
+        return jsonify(status='ok')
         flash("Exten Inserted Successfully")
       else:
         flash("Wrong insert")
@@ -120,7 +124,6 @@ def exten_insert():
 @admin_required
 def exten_update(id):
     form = ExtenForm()
-    flash(form.dtmf_mode.data)
     if request.method == 'POST':
         endp = Ps_endpoints.query.filter_by(id=id).first_or_404()
         auth = Ps_auths.query.filter_by(id=id).first_or_404()
@@ -151,3 +154,61 @@ def exten_delete(id):
     return redirect(url_for('pbx.exten_index'))
 
 
+@bp.route('/alarm/index')
+@login_required
+@operator_required
+def alarm_index():
+    form = AlarmForm()
+    alarm_data = Alarms.query.order_by(Alarms.order).all()
+    return render_template("pbx/alarm.html", alarm_data=alarm_data, form=form)
+
+
+@bp.route('/alarm/insert', methods=['POST'])
+@login_required
+@admin_required
+def alarm_insert():
+    form = AlarmForm(request.form)
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            alarm = Alarms.query.filter_by(order=form.order.data).first()
+            if alarm:
+                flash('Order exist')
+                return redirect(url_for('pbx.alarm_index'))
+            play_file = form.play_file.data
+            order = form.order.data
+            active = form.active.data
+            alarm = Alarms(play_file=play_file, order=order, active=active)
+            db.session.add(alarm)
+            db.session.commit()
+            flash("Alarm Inserted Successfully")
+        else:
+            flash("Wrong insert")
+
+    return redirect(url_for('pbx.alarm_index'))
+
+
+@bp.route('/alarm/update/<id>', methods=['GET','POST'])
+@login_required
+@admin_required
+def alarm_update(id):
+    form = AlarmForm()
+    if request.method == 'POST':
+        alarm = Alarms.query.filter_by(id=id).first_or_404()
+        flash(form.active.data)
+        alarm.play_file = form.play_file.data
+        alarm.order = form.order.data
+        alarm.active = form.active.data
+        db.session.commit()
+        flash("Alarm Updated Successfully")
+        return redirect(url_for('pbx.alarm_index'))
+
+
+# delete employee
+@bp.route('/alarm/delete/<id>/', methods=['GET', 'POST'])
+@admin_required
+def alarm_delete(id):
+    alarm = Alarms.query.get(id)
+    db.session.delete(alarm)
+    db.session.commit()
+    flash("Alarm Deleted Successfully")
+    return redirect(url_for('pbx.alarm_index'))
