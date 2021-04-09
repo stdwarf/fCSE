@@ -1,122 +1,25 @@
 {% extends "base.html" %}
 {% import 'bootstrap/wtf.html' as wtf %}
-
-{% block title %}
-
-{% endblock %}
-
-{% block content %}
-
-<div class="container" xmlns="http://www.w3.org/1999/html">
-    <div class="row">
-        <div class="jumbotron p-3">
-        <div class="col md-8">
-                <h2 class="display-4">Manage <b >CallForward </b>  </h2>
-        </div>
-        <div class="col md-4">
-            <button type="button"  class="btn btn-success float-right"
-            data-toggle="modal" data-target="#mymodal">Add New Forward</button>
-        </div>
-        </div>
-    </div>
-    <div class="row">
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for message in messages %}
-                <div class="alert alert-success alert-dismissable" role="alert">
-                    <button type="button" class="close" data-dismiss="alert" aria-label="close">
-                        <span aria-hidden="true">x</span>
-                    </button>
-                    {{message}}
-                </div>
-                {% endfor %}
+{% block app_content %}
+    {% if current_user.is_anonymous %}
+            <h1>Hello!</h1>
+    {% else %}
+            <h2>Привет </h2>
+            <h2>ты залогинился используя учетку LDAP!</h2>
+        <br>
+        <h4>Твои данные</h4>
+        <li><b>компания</b>: {{ current_user.company }}</li>
+        <li><b>департамент</b>: {{ current_user.department }}</li>
+        <li><b>должность</b>: {{ current_user.description }}</li>
+        <li><b>ФИО</b>: {{ current_user.fullname }}</li>
+        <li><b>почта</b>: {{ current_user.email }}</li>
+        <li><b>логин</b>: {{ current_user.username }}</li>
+            {% if data %}
+                <h3>{{ data }}</h3>
             {% endif %}
-        {% endwith %}
-    </div>
-        <table id="sample_data" class="table table-hover table-striped">
-                <thead>
-                    <tr>
-{#                        <th>ID</th>#}
-                        <th>User</th>
-                        <th>Forward_phone</th>
-                        <th>Timeout</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                   {% for row in callforward_data %}
-                    <tr>
-{#                        <td>{{row.id}}</td>#}
-                        <td>{{row.exten}}</td>
-                        <td>{{row.forward_phone}}</td>
-                        <td>{{row.timeout}}</td>
-                        <td>
-                            <a href="/update/{{row.id}}" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#modaledit{{row.id}}">Edit</a>
-                            <a href="/delete/{{row.id}}" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Delete ?')">Delete</a>
-                        </td>
-                    </tr>
-
-
-
-     <!-- Modal Edit Employee-->
-     <div id="modaledit{{row.id}}" class="modal fade" role="dialog">
-        <div class="modal-dialog">
-        <div class="modal-content">
-       <div class="modal-header"><h4 class="modal-title">Update Information</h4></div>
-        <div class="modal-body">
-        <form action="{{url_for('main.update', id=row.id)}}" method="POST">
-         <div class="form-group">
-          <label>User:</label>
-          <input type="hidden"  name="id" value="{{row.id}}">
-          <input type="number" size="4" min=1000 max=9999 class="form-control" name="exten" value="{{row.exten}}">
-         </div>
-         <div class="form-group">
-          <label>Forward_phone:</label>
-          <input type="number" size="11" min=80000000000 max=89999999999 class="form-control" name="forward_phone" value="{{row.forward_phone}}">
-         </div>
-         <div class="col-auto">
-          {{ wtf.form_field(form.timeout) }}
-         </div>
-            <div class="modal-footer">
-            <button class="btn btn-primary" type="submit">Update</button>
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </form>
-        </div>
-      </div>
-      </div>
-     {% endfor %}
-    </tbody>
-        </table>
-  <!-- Modal Add Employee-->
-    <div id="mymodal" class="modal fade" role="dialog">
-      <div class="modal-dialog">
-        <div class="modal-content">
-        <div class="modal-header"><h4 class="modal-title">Add Call Forward</h4></div>
-    <div class="modal-body">
-     <form action="{{url_for('main.insert')}}" method="POST", role="form">
-           {{ form.hidden_tag() }}
-           {{ wtf.form_errors(form, hiddens="only") }}
-     <div class="form-group">
-         <label>User:</label>
-          <input type="number" size="4" min=1000 max=9999 class="form-control" name="exten" value="">
-         </div>
-         <div class="form-group">
-          <label>Forward_phone:</label>
-          <input type="number" size="11" min=80000000000 max=89999999999 class="form-control" name="forward_phone" value="">
-         </div>
-      <div class="col-auto">
-          {{ wtf.form_field(form.timeout) }}
-      </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-primary" >Submit</button>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      </div>
-     </form>
-    </div>
-
-   </div>
-   </div>
-  </div>
-</div>
+    {% endif %}
+    {% if form %}
+    {{ wtf.quick_form(form) }}
+    <br>
+    {% endif %}
 {% endblock %}

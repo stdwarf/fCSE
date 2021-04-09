@@ -87,25 +87,26 @@ $(document).on('click',".checkbox_check", function () {
             </div>
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                    <li><a href="{{ url_for('main.index') }}">Home</a></li>
-                    <li><a href="{{ url_for('pbx.index') }}">Clid</a></li>
-                    <li><a href="{{ url_for('pbx.exten_index') }}">Exten</a></li>
-                    <li><a href="{{ url_for('pbx.alarm_index') }}">Alarm</a></li>
+                    <li><a href="{{ url_for('pbx.fwd_index') }}">FWD</a></li>
+                    {% if current_user.has_role('Admin') %}
+                         <li><a href="{{ url_for('pbx.clid_index') }}">Clid</a></li>
+                        <li><a href="{{ url_for('pbx.exten_index') }}">Exten</a></li>
+                        <li><a href="{{ url_for('pbx.alarm_index') }}">Alarm</a></li>
+                    {% endif %}
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-
+                    {% if current_user.has_role('Admin') %}
+                         <li><a href="{{ url_for('admin.index') }}">Admin</a></li>
+                    {% endif %}
                     {% if current_user.is_anonymous %}
                         <li><a href="{{ url_for('auth.login') }}">Login</a></li>
                     {% else %}
-                        {% if current_user.roles[0].name == 'Admin' %}
-                            <li><a href="{{ url_for('user.user') }}">Admin</a></li>
-                        {% endif %}
                         <li><a class="nav-link" role="button" data-toggle="tooltip" data-html="true"
-                               href="{{ url_for('auth.logout') }}"
-                               title="{{ current_user.fullname }}
+                           href="{{ url_for('auth.logout') }}"
+                           title="{{ current_user.fullname }}
 {{ current_user.company }}
 {{ current_user.department }}
-{{ current_user.title }}">Logout</a></li>
+{{ current_user.description }}">Logout</a></li>
                     {% endif %}
                 </ul>
             </div>

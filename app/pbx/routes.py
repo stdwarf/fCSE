@@ -2,9 +2,11 @@ import json
 from datetime import datetime
 
 from flask import render_template, flash, redirect, url_for, request, session, current_app, jsonify
-from flask_login import current_user, login_required, logout_user
-from app import db, admin_required, operator_required
-from app.models import Clid, Ps_auths, Ps_aors, Ps_endpoints, Alarms
+from flask_login import login_required, logout_user
+from flask_security import current_user, roles_accepted
+from app import db
+from app.main.forms import CallforwardForm
+from app.models import Clid, Ps_auths, Ps_aors, Ps_endpoints, Alarms, Callforward
 from app.pbx import bp
 from app.pbx.forms import ClidForm, ExtenForm, AlarmForm
 
@@ -32,20 +34,76 @@ def before_request():
     else:
         return redirect(url_for('auth.login'))
 
+@bp.route('/fwd/index')
+@roles_accepted('Admin', 'Operator','User')
+def fwd_index():
+    form = CallforwardForm()
+    callforward_data = Callforward.query.order_by(Callforward.exten).all()
+    return render_template("pbx/fwd.html", callforward_data=callforward_data, form=form)
 
-@bp.route('/index')
-@login_required
-@admin_required
-def index():
+
+# insert data to mysql database via html forms
+@bp.route('/fwd/insert', methods=['POST'])
+@roles_accepted('Admin', 'Operator')
+def fwd_insert():
+    form = CallforwardForm(request.form)
+    if request.method == 'POST':
+      if form.validate_on_submit():
+        fwd = Callforward.query.filter_by(exten=form.exten.data).first()
+        if fwd:
+            flash('Callforward exist')
+            return redirect(url_for('pbx.fwd_index'))
+#          if request.method == 'POST':
+        exten = form.exten.data
+        forward_phone = form.forward_phone.data
+        timeout = form.timeout.data
+        my_data = Callforward(exten, forward_phone, timeout)
+        db.session.add(my_data)
+        db.session.commit()
+        flash("Callforward Inserted Successfully")
+      else:
+        flash("Wrong insert")
+
+    return redirect(url_for('pbx.fwd_index'))
+
+
+# update Callforward
+@bp.route('/fwd/update/<id>', methods=['POST'])
+@roles_accepted('Admin', 'Operator')
+def fwd_update(id):
+    form = CallforwardForm()
+    if request.method == 'POST':
+        my_data = Callforward.query.filter_by(id=id).first_or_404()
+        my_data.exten = form.exten.data
+        my_data.forward_phone = form.forward_phone.data
+        my_data.timeout = form.timeout.data
+        db.session.commit()
+        flash("Callforward Updated Successfully")
+        return redirect(url_for('pbx.fwd_index'))
+
+
+# delete Callforward
+@bp.route('/fwd/delete/<id>/', methods=['GET', 'POST'])
+@roles_accepted('Admin', 'Operator')
+def fwd_delete(id):
+    my_data = Callforward.query.get(id)
+    db.session.delete(my_data)
+    db.session.commit()
+    flash("Callforward Deleted Successfully")
+    return redirect(url_for('pbx.fwd_index'))
+
+
+@bp.route('/clid/index')
+@roles_accepted('Admin', 'Operator')
+def clid_index():
     form = ClidForm()
     clid_data = Clid.query.order_by(Clid.clid_num).all()
     return render_template("pbx/clid.html", clid_data=clid_data, form=form)
 
 
-@bp.route('/update/<id>', methods=['POST'])
-@login_required
-@admin_required
-def update(id):
+@bp.route('/clid/update/<id>', methods=['POST'])
+@roles_accepted('Admin', 'Operator')
+def clid_update(id):
     form = ClidForm()
     if request.method == 'POST':
         my_data = Clid.query.filter_by(id=id).first_or_404()
@@ -60,24 +118,23 @@ def update(id):
         db.session.commit()
         return jsonify(status='ok')
         flash("CLID Updated Successfully")
-        return redirect(url_for('pbx.index'))
+        return redirect(url_for('pbx.clid_index'))
 
 
 # delete employee
-@bp.route('/delete/<id>/', methods=['GET', 'POST'])
-@admin_required
-def delete(id):
+@bp.route('/clid/delete/<id>/', methods=['GET', 'POST'])
+@roles_accepted('Admin', 'Operator')
+def clid_delete(id):
     my_data = Clid.query.get(id)
     db.session.delete(my_data)
     db.session.commit()
     flash("Clid Deleted Successfully")
-    return redirect(url_for('pbx.index'))
+    return redirect(url_for('pbx.clid_index'))
 
 
 #exten
 @bp.route('/exten/index')
-@login_required
-@admin_required
+@roles_accepted('Admin', 'Operator')
 def exten_index():
     form = ExtenForm()
     exten = Ps_auths.query.order_by(Ps_auths.id).all()
@@ -86,8 +143,7 @@ def exten_index():
 
 # insert data to mysql database via html forms
 @bp.route('/exten/insert', methods=['POST'])
-@login_required
-@operator_required
+@roles_accepted('Admin', 'Operator')
 def exten_insert():
     form = ExtenForm(request.form)
     if request.method == 'POST':
@@ -120,8 +176,7 @@ def exten_insert():
 
 
 @bp.route('/exten/update/<id>', methods=['POST'])
-@login_required
-@admin_required
+@roles_accepted('Admin', 'Operator')
 def exten_update(id):
     form = ExtenForm()
     if request.method == 'POST':
@@ -141,7 +196,7 @@ def exten_update(id):
 
 # delete employee
 @bp.route('/exten/delete/<id>/', methods=['GET', 'POST'])
-@admin_required
+@roles_accepted('Admin', 'Operator')
 def exten_delete(id):
     endp = Ps_endpoints.query.get(id)
     aor = Ps_aors.query.get(id)
@@ -155,8 +210,7 @@ def exten_delete(id):
 
 
 @bp.route('/alarm/index')
-@login_required
-@operator_required
+@roles_accepted('Admin', 'Operator')
 def alarm_index():
     form = AlarmForm()
     alarm_data = Alarms.query.order_by(Alarms.order).all()
@@ -164,8 +218,7 @@ def alarm_index():
 
 
 @bp.route('/alarm/insert', methods=['POST'])
-@login_required
-@admin_required
+@roles_accepted('Admin', 'Operator')
 def alarm_insert():
     form = AlarmForm(request.form)
     if request.method == 'POST':
@@ -188,8 +241,7 @@ def alarm_insert():
 
 
 @bp.route('/alarm/update/<id>', methods=['GET','POST'])
-@login_required
-@admin_required
+@roles_accepted('Admin', 'Operator')
 def alarm_update(id):
     form = AlarmForm()
     if request.method == 'POST':
@@ -204,7 +256,7 @@ def alarm_update(id):
 
 # delete employee
 @bp.route('/alarm/delete/<id>/', methods=['GET', 'POST'])
-@admin_required
+@roles_accepted('Admin', 'Operator')
 def alarm_delete(id):
     alarm = Alarms.query.get(id)
     db.session.delete(alarm)
@@ -212,7 +264,9 @@ def alarm_delete(id):
     flash("Alarm Deleted Successfully")
     return redirect(url_for('pbx.alarm_index'))
 
+
 @bp.route('/alarm/postactive', methods=['GET', 'POST'])
+@roles_accepted('Admin', 'Operator')
 def alarm_postactive():
     dict=request.form.to_dict()
     activeid=dict['javascript_data[activeid]']

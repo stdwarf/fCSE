@@ -6,7 +6,7 @@ from flask import redirect, render_template, request, flash, current_app, url_fo
 from werkzeug.urls import url_parse
 from app.auth import bp
 from app.auth.forms import LoginForm
-from app.models import User, Role, UserRoles
+from app.models import User, Role
 from app.main.routes import get_ldap_connection
 from app import db
 
@@ -14,7 +14,7 @@ from app import db
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        flash('You are already logged in.')
+#        flash('You are already logged in.')
         return redirect(url_for('main.index'))
     form = LoginForm()
     if form.validate_on_submit():
@@ -45,9 +45,8 @@ def login():
             title = data[0][1]['title'][0].decode('utf-8')
             user = User.query.filter_by(username=username).first()
             if user is None:
-                u = User(username=username, email=email, fullname=fullname, company=company,
-                         title=title)
-                u.roles.append(Role.query.filter_by(name='Operator').first())
+                u = User(username=username, email=email, fullname=fullname, company=company, description=title, active=True)
+                u.roles.append(Role.query.filter_by(name='User').first())
                 db.session.add(u)
                 db.session.commit()
             else:
@@ -56,9 +55,10 @@ def login():
                 user.fullname = fullname
                 user.company = company
                 user.department = department
-                user.title = title
+                user.description = title
                 db.session.commit()
         except:
+            db.session.rollback()
             flash("Something happen")
         conn.unbind_s()
         user = User.query.filter_by(username=username).first()
@@ -67,7 +67,7 @@ def login():
         else:
             login_user(user, remember=True)
             session['last_active'] = datetime.now()
-            flash('You have successfully logged in.', 'success')
+#            flash('You have successfully logged in.', 'success')
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('main.index')

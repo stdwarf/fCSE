@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 import logging
-from datetime import timedelta, datetime
 from logging.handlers import RotatingFileHandler
 import os
-from functools import wraps
-from flask import Flask, session, flash, current_app, redirect, url_for
+from flask import Flask, session,  request
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
-from flask_login import LoginManager, current_user
+from flask_login import LoginManager
+from flask_babelex import Babel
+from flask_security import Security, current_user, SQLAlchemySessionUserDatastore
 from config import Config
 
 db = SQLAlchemy()
@@ -18,7 +18,8 @@ login.next_url = 'auth.login'
 login.login_message = "Пожалуйста, войдите, чтобы открыть эту страницу."
 migrate = Migrate()
 bootstrap = Bootstrap()
-
+security = Security()
+babel = Babel()
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -26,7 +27,12 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     bootstrap.init_app(app)
+    babel.init_app(app)
     login.init_app(app)
+
+    from app.models import User, Role
+    user_datastore = SQLAlchemySessionUserDatastore(db, User, Role)
+    security.init_app(app, user_datastore)
 
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)
@@ -37,8 +43,8 @@ def create_app(config_class=Config):
     from app.pbx import bp as pbx_bp
     app.register_blueprint(pbx_bp, url_prefix='/pbx')
 
-    from app.user import bp as user_bp
-    app.register_blueprint(user_bp, url_prefix='/user')
+    from app import admin
+    admin.init_app(app, db)
 
     if not app.debug and not app.testing:
         if not os.path.exists('logs'):
@@ -53,46 +59,14 @@ def create_app(config_class=Config):
         app.logger.info('CSE startup')
     return app
 
+@babel.localeselector
+def get_locale():
+    override = request.args.get('lang')
 
-def admin_required(f):
-    @wraps(f)
-    def wrap(*args, **kwargs):
-        flash(current_user.roles[0].name)
-        if current_user.roles[0].name in current_app.config['ADMIN_ROLE_LIST']:
-            return f(*args, **kwargs)
-        else:
-            flash("You need to be an Admin to view this page.")
-            return redirect(url_for('main.index'))
+    if override:
+        session['lang'] = override
 
-    return wrap
-
-
-def user_required(f):
-    @wraps(f)
-    def wrap(*args, **kwargs):
-        flash(current_user.roles[0].name)
-        if current_user.roles[0].name in current_app.config['USER_ROLE_LIST']:
-            return f(*args, **kwargs)
-        else:
-            flash("You need to be an User to view this page.")
-            return redirect(url_for('main.index'))
-
-    return wrap
-
-
-def operator_required(f):
-    @wraps(f)
-    def wrap(*args, **kwargs):
-        flash(current_user.roles[0].name)
-        if current_user.roles[0].name in current_app.config['OPERATOR_ROLE_LIST']:
-            return f(*args, **kwargs)
-        else:
-            flash("You need to be an Operator to view this page.")
-            return redirect(url_for('main.index'))
-
-    return wrap
-
-
+    return session.get('lang', 'ru')
 
 from app import models
 

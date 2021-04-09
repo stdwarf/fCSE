@@ -1,7 +1,45 @@
 import enum
 from app import db, login
 from datetime import datetime
-from flask_login import UserMixin
+from flask_security import RoleMixin,  UserMixin
+
+roles_users = db.Table(
+    'roles_users',
+    db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
+    db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
+)
+
+class User(db.Model, UserMixin):
+    __tablename__ = 'user'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64), index=True, unique=True)
+    fullname = db.Column(db.String(254), index=True)
+    email = db.Column(db.String(120), index=True)
+    company = db.Column(db.String(254), index=True)
+    description = db.Column(db.String(254), index=True)
+    department = db.Column(db.String(254), index=True)
+    active = db.Column(db.Boolean())
+    last_login = db.Column(db.DateTime, default=datetime.utcnow)
+    roles = db.relationship('Role', secondary='roles_users', backref=db.backref("users", lazy="dynamic", cascade="delete"))
+
+    def __repr__(self):
+        return f'<User {self.username}, {self.email}, {self.fullname}>'
+
+    def __str__(self):
+        return self.username
+
+
+class Role(db.Model, RoleMixin):
+    __tablename__ = 'role'
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(50), unique=True)
+    description = db.Column(db.String(255))
+
+    def __str__(self):
+        return self.name
+
+
+
 
 
 class BoolEnum(enum.Enum):
@@ -124,32 +162,7 @@ class Clid(db.Model):
     def __repr__(self):
         return f'<CLIDNAME {self.clid_name}>'
 
-class User(UserMixin, db.Model):
-    __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), index=True, unique=True)
-    fullname = db.Column(db.String(254), index=True)
-    email = db.Column(db.String(120), index=True)
-    company = db.Column(db.String(254), index=True)
-    department = db.Column(db.String(254), index=True)
-    title = db.Column(db.String(254), index=True)
-    last_login = db.Column(db.DateTime, default=datetime.utcnow)
-    roles = db.relationship('Role', secondary='user_roles', backref=db.backref("user", lazy="dynamic"))
 
-    def __repr__(self):
-        return f'<User {self.username}, {self.email}, {self.fullname}>'
-
-class Role(db.Model):
-    __tablename__ = 'roles'
-    id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(50), unique=True)
-    users = db.relationship('User', secondary='user_roles', backref=db.backref("role", lazy="dynamic"))
-
-class UserRoles(db.Model):
-    __tablename__ = 'user_roles'
-    id = db.Column(db.Integer(), primary_key=True)
-    user_id = db.Column(db.Integer(), db.ForeignKey('users.id', ondelete='CASCADE'),unique=True)
-    role_id = db.Column(db.Integer(), db.ForeignKey('roles.id', ondelete='CASCADE'))
 
 
 class Alarms(db.Model):

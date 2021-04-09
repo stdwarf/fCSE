@@ -55,8 +55,8 @@
                         <td>{{row.email}}</td>
                         <td>{{row.title}}</td>
                         <td>
-                            <a href="{{ url_for('pbx.update', id=row.id)}}" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#modaledit{{row.id}}">Edit</a>
-                            <a href="{{ url_for('pbx.delete', id=row.id)}}" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Delete ?')">Delete</a>
+                            <a href="{{ url_for('pbx.clid_update', id=row.id)}}" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#modaledit{{row.id}}">Edit</a>
+                            <a href="{{ url_for('pbx.clid_delete', id=row.id)}}" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Delete ?')">Delete</a>
                         </td>
                     </tr>
     <!-- Modal Edit Employee-->
@@ -65,7 +65,7 @@
         <div class="modal-content">
        <div class="modal-header"><h4 class="modal-title">Update Information</h4></div>
         <div class="modal-body">
-        <form action="{{url_for('pbx.update', id=row.id)}}" method="POST">
+        <form action="{{url_for('pbx.clid_update', id=row.id)}}" method="POST">
          <div class="form-group">
           <label>Clid_Name:</label>
           <input type="hidden"  name="id" value="{{row.id}}">
