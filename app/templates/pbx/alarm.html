@@ -53,9 +53,9 @@
                         <td>{{row.order}}</td>
                         <td>
                         {% if row.active %}
-                            <input type="checkbox" name="active" checked="checked", onclick="return false;">
+                            <input type="checkbox" name="active" checked="checked", data-active_id="{{ row.id }}", class="checkbox_check">
                         {% else %}
-                            <input type="checkbox" name="active", onclick="return false;">
+                            <input type="checkbox" name="active", id="checkbox_check", onclick="return false;">
 
                          {% endif   %}
                         </td>
@@ -111,7 +111,7 @@
            {{ form.hidden_tag() }}
            {{ wtf.form_errors(form, hiddens="only") }}
       <div class="col-auto">
-          {{ form.play_file }}
+          {{ wtf.form_field(form.play_file) }}
       </div>
       <div class="col-auto">
           {{ wtf.form_field(form.order) }}

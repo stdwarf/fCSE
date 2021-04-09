@@ -194,7 +194,6 @@ def alarm_update(id):
     form = AlarmForm()
     if request.method == 'POST':
         alarm = Alarms.query.filter_by(id=id).first_or_404()
-        flash(form.active.data)
         alarm.play_file = form.play_file.data
         alarm.order = form.order.data
         alarm.active = form.active.data
@@ -211,4 +210,22 @@ def alarm_delete(id):
     db.session.delete(alarm)
     db.session.commit()
     flash("Alarm Deleted Successfully")
+    return redirect(url_for('pbx.alarm_index'))
+
+@bp.route('/alarm/postactive', methods=['GET', 'POST'])
+def alarm_postactive():
+    dict=request.form.to_dict()
+    activeid=dict['javascript_data[activeid]']
+    active=dict['javascript_data[active]']
+    if active=='true':
+        active = True
+    else:
+        active = False
+    print(active)
+    print(activeid)
+    if request.method == 'POST':
+        alarm = Alarms.query.filter_by(id=activeid).first_or_404()
+        alarm.active = active
+        db.session.commit()
+        flash("Alarm Updated Successfully")
     return redirect(url_for('pbx.alarm_index'))

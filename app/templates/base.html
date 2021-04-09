@@ -54,6 +54,17 @@ $(document).on("click", ".alarm_update", function () {
          $(".modal-body #active").prop("checked", false);
      }
 });
+$(document).on('click',".checkbox_check", function () {
+    var activeid = $(this).data('active_id');
+    let checkboxStatus = $(this).prop('checked')
+    let dictdata = {
+        'active': checkboxStatus,
+        'activeid': activeid,
+    }
+    $.post("postactive", {
+        javascript_data: dictdata
+    });
+})
 </script>
     </head>
 
