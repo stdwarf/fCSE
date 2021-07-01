@@ -72,7 +72,7 @@
          </div>
          <div class="form-group">
           <label>Forward_phone:</label>
-          <input type="number" size="11" min=80000000000 max=89999999999 class="form-control" name="forward_phone" value="{{row.forward_phone}}">
+          <input type="number" size="11" min=1000 max=89999999999 class="form-control" name="forward_phone" value="{{row.forward_phone}}">
          </div>
          <div class="col-auto">
           {{ wtf.form_field(form.timeout) }}
@@ -103,7 +103,7 @@
          </div>
          <div class="form-group">
           <label>Forward_phone:</label>
-          <input type="number" size="11" min=80000000000 max=89999999999 class="form-control" name="forward_phone" value="">
+          <input type="number" size="11" min=1000 max=89999999999 class="form-control" name="forward_phone" value="">
          </div>
       <div class="col-auto">
           {{ wtf.form_field(form.timeout) }}

@@ -17,6 +17,48 @@
             <button type="button"  class="btn btn-success float-right"
             data-toggle="modal" data-target="#mymodal">Add New Alarm</button>
         </div>
+            <div class="accordion" id="accordionExample">
+            <div class="card">
+                <div class="card-header" id="headingOne">
+                  <h5 class="mb-0">
+                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                      Напоминание
+                    </button>
+                  </h5>
+                </div>
+
+                <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+                  <div class="card-body">
+                    <table class="table">
+                        <tbody>
+                            <tr><td><strong>1.1_Welcome</strong></td><td>Уважаемые коллеги</td></tr>
+                            <tr><td><strong>2.1_Tech</strong></td><td>В настоящее время наблюдаются технические проблемы в работе сервисов..</td></tr>
+                            <tr><td><strong>2.2_Plan</strong></td><td>В настоящее время проводятся плановые технические работы, затрагивающие сервисы..</td></tr>
+                            <tr><td><strong>3.1_Email</strong></td><td>Электронной почты</td></tr>
+                            <tr><td><strong>3.2_Kargo</strong></td><td>Карго</td></tr>
+                            <tr><td><strong>3.3_Net_files</strong></td><td>Доступа к сетевым файлам</td></tr>
+                            <tr><td><strong>3.4_Pbx</strong></td><td>Телефонии</td></tr>
+                            <tr><td><strong>3.5_Terminal</strong></td><td>Терминальных станций</td></tr>
+                            <tr><td><strong>3.6_Internet</strong></td><td>Доступа в интернет</td></tr>
+                            <tr><td><strong>3.7_Service_Desc</strong></td><td>Сервис-деск</td></tr>
+                            <tr><td><strong>3.8_Remote_desktop</strong></td><td>Удалённого доступа</td></tr>
+                            <tr><td><strong>3.9_Printers</strong></td><td>Доступа к принтерам</td></tr>
+                            <tr><td><strong>3.10_PC</strong></td><td>Авторизации на рабочих компьютерах</td></tr>
+                            <tr><td><strong>3.11_Mob_app</strong></td><td>Мобильного приложения</td></tr>
+                            <tr><td><strong>3.12_Personal_area</strong></td><td>Личного кабинета</td></tr>
+                            <tr><td><strong>3.13_Integration</strong></td><td>Интеграции с клиентами</td></tr>
+                            <tr><td><strong>3.14_Money</strong></td><td>Приёма платежей</td></tr>
+                            <tr><td><strong>4.1_Tech</strong></td><td>Наши специалисты уже занимаются устранением сбоя. Работа сервисов будет восстановлена в максимально короткие сроки.</td></tr>
+                            <tr><td><strong>4.2_Plan</strong></td><td>По завершению работ, сервисы будут восстановлены.</td></tr>
+                            <tr><td><strong>4.3_Sheet</strong></td><td>С расписанием плановых работ вы можете ознакомиться на корпоративном портале.</td></tr>
+                            <tr><td><strong>5.1_Bye</strong></td><td>Спасибо за понимание.</td></tr>
+                            <tr><td><strong>6.1_Portal</strong></td><td>Вы можете самостоятельно завести заявку на портале самообслуживания, выбрав нужную категорию в каталоге услуг.</td></tr>
+                        </tbody>
+                    </table>
+                  </div>
+                </div>
+            </div>
+            </div>
         </div>
           <div class="row">
         {% with messages = get_flashed_messages() %}
@@ -32,7 +74,8 @@
             {% endif %}
         {% endwith %}
         </div>
-    </div>
+
+
         <table id="sample_data" class="table table-hover table-striped">
                 <thead>
                     <tr>

@@ -54,6 +54,16 @@ $(document).on("click", ".alarm_update", function () {
          $(".modal-body #active").prop("checked", false);
      }
 });
+$(document).on("click", ".blacklist_update", function () {
+     var clid = $(this).data('clid');
+     var active = $(this).data('active');
+     $(".modal-body #clid").val( clid );
+     if (active=="True") {
+         $(".modal-body #active").prop("checked", true);
+     } else {
+         $(".modal-body #active").prop("checked", false);
+     }
+});
 $(document).on('click',".checkbox_check", function () {
     var activeid = $(this).data('active_id');
     let checkboxStatus = $(this).prop('checked')
@@ -65,6 +75,7 @@ $(document).on('click',".checkbox_check", function () {
         javascript_data: dictdata
     });
 })
+
 </script>
     </head>
 
@@ -87,11 +98,17 @@ $(document).on('click',".checkbox_check", function () {
             </div>
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                    <li><a href="{{ url_for('pbx.fwd_index') }}">FWD</a></li>
                     {% if current_user.has_role('Admin') %}
-                         <li><a href="{{ url_for('pbx.clid_index') }}">Clid</a></li>
+
+                        <li><a href="{{ url_for('pbx.clid_index') }}">Clid</a></li>
                         <li><a href="{{ url_for('pbx.exten_index') }}">Exten</a></li>
+                        <li><a href="{{ url_for('pbx.fwd_index') }}">FWD</a></li>
                         <li><a href="{{ url_for('pbx.alarm_index') }}">Alarm</a></li>
+                        <li><a href="{{ url_for('pbx.blacklist_index') }}">Blacklist</a></li>
+                    {% elif current_user.has_role('Operator')%}
+                        <li><a href="{{ url_for('pbx.fwd_index') }}">FWD</a></li>
+                        <li><a href="{{ url_for('pbx.alarm_index') }}">Alarm</a></li>
+                        <li><a href="{{ url_for('pbx.blacklist_index') }}">Blacklist</a></li>
                     {% endif %}
                 </ul>
                 <ul class="nav navbar-nav navbar-right">

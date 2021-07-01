@@ -6,9 +6,9 @@ from flask_login import login_required, logout_user
 from flask_security import current_user, roles_accepted
 from app import db
 from app.main.forms import CallforwardForm
-from app.models import Clid, Ps_auths, Ps_aors, Ps_endpoints, Alarms, Callforward
+from app.models import Clid, Ps_auths, Ps_aors, Ps_endpoints, Alarms, Callforward, Blacklist
 from app.pbx import bp
-from app.pbx.forms import ClidForm, ExtenForm, AlarmForm
+from app.pbx.forms import ClidForm, ExtenForm, AlarmForm, BlacklistForm
 
 
 @bp.before_request
@@ -283,3 +283,78 @@ def alarm_postactive():
         db.session.commit()
         flash("Alarm Updated Successfully")
     return redirect(url_for('pbx.alarm_index'))
+
+
+
+@bp.route('/blacklist/index')
+@roles_accepted('Admin', 'Operator')
+def blacklist_index():
+    form = BlacklistForm()
+    blacklist_data = Blacklist.query.order_by(Blacklist.clid).all()
+    return render_template("pbx/blacklist.html", blacklist_data=blacklist_data, form=form)
+
+
+@bp.route('/blacklist/insert', methods=['POST'])
+@roles_accepted('Admin', 'Operator')
+def blacklist_insert():
+    form = BlacklistForm(request.form)
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            blacklist = Blacklist.query.filter_by(clid=form.clid.data).first()
+            if blacklist:
+                flash('Order exist')
+                return redirect(url_for('pbx.blacklist_index'))
+            clid = form.clid.data
+            active = form.active.data
+            blacklist = Blacklist(clid=clid, active=active)
+            db.session.add(blacklist)
+            db.session.commit()
+            flash("Blacklist Inserted Successfully")
+        else:
+            flash("Wrong insert")
+
+    return redirect(url_for('pbx.blacklist_index'))
+
+
+@bp.route('/blacklist/update/<id>', methods=['GET','POST'])
+@roles_accepted('Admin', 'Operator')
+def blacklist_update(id):
+    form = BlacklistForm()
+    if request.method == 'POST':
+        blacklist = Blacklist.query.filter_by(id=id).first_or_404()
+        blacklist.clid = form.clid.data
+        blacklist.active = form.active.data
+        db.session.commit()
+        flash("Blacklist Updated Successfully")
+        return redirect(url_for('pbx.blacklist_index'))
+
+
+# delete
+@bp.route('/blacklist/delete/<id>/', methods=['GET', 'POST'])
+@roles_accepted('Admin', 'Operator')
+def blacklist_delete(id):
+    blacklist = Blacklist.query.get(id)
+    db.session.delete(blacklist)
+    db.session.commit()
+    flash("Blacklist Deleted Successfully")
+    return redirect(url_for('pbx.blacklist_index'))
+
+
+@bp.route('/blacklist/postactive', methods=['GET', 'POST'])
+@roles_accepted('Admin', 'Operator')
+def blacklist_postactive():
+    dict = request.form.to_dict()
+    activeid = dict['javascript_data[activeid]']
+    active = dict['javascript_data[active]']
+    if active =='true':
+        active = True
+    else:
+        active = False
+    print(active)
+    print(activeid)
+    if request.method == 'POST':
+        blacklist = Blacklist.query.filter_by(id=activeid).first_or_404()
+        blacklist.active = active
+        db.session.commit()
+        flash("Blacklist Updated Successfully")
+    return redirect(url_for('pbx.blacklist_index'))

@@ -1,7 +1,17 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, IntegerField, SelectField, BooleanField
-from wtforms.validators import DataRequired, NumberRange
+from wtforms.validators import DataRequired, NumberRange, ValidationError, InputRequired
 
+
+def length(min=-1, max=-1):
+    message = 'Must be between %d and %d characters long.' % (min, max)
+
+    def _length(form, field):
+        l = field.data and len(field.data) or 0
+        if l < min or max != -1 and l > max:
+            raise ValidationError(message)
+
+    return _length
 
 #new CLID Class
 class ClidForm(FlaskForm):
@@ -27,7 +37,7 @@ class ExtenForm(FlaskForm):
 
 
 class AlarmForm(FlaskForm):
-    play_file = SelectField('Choice', choices=[('1.1_Welcome','Уважаемые коллеги'),('2.1_Tech','В настоящее время наблюдаются технические проблемы в работе сервиса..'),
+    play_file = SelectField('Choice', choices=[('1.1_Welcome','Уважаемые коллеги'),('2.1_Tech','В настоящее время наблюдаются технические проблемы в работе сервисов..'),
                                                ('2.2_Plan','В настоящее время проводятся плановые технические работы, затрагивающие сервисы..'),
                                                ('3.1_Email','Электронной почты'),('3.2_Kargo','Карго'),
                                                ('3.3_Net_files','Доступа к сетевым файлам'),('3.4_Pbx','Телефонии'),
@@ -37,12 +47,18 @@ class AlarmForm(FlaskForm):
                                                ('3.11_Mob_app','Мобильного приложения'),('3.12_Personal_area','Личного кабинета'),
                                                ('3.13_Integration','Интеграции с клиентами'),('3.14_Money','Приёма платежей'),
                                                ('4.1_Tech','Наши специалисты уже занимаются устранением сбоя. Работа сервисов будет восстановлена в максимально короткие сроки.'),
-                                               ('4.2_Plan','По завершению работ сервисы будут восстановлены.'),
-                                               ('4.2.1_Sheet', 'С расписанием плановых работ вы можете ознакомиться на корпоративном портале.'),
+                                               ('4.2_Plan','По завершению работ, сервисы будут восстановлены.'),
+                                               ('4.3_Sheet', 'С расписанием плановых работ вы можете ознакомиться на корпоративном портале.'),
                                                ('5.1_Bye','Спасибо за понимание.'),
                                                ('6.1_Portal','Вы можете самостоятельно завести заявку на портале самообслуживания, выбрав нужную категорию в каталоге услуг.')],
                             default=('1.1_Welcome','Уважаемые коллеги'))
     order = IntegerField('Order')
     #active = BooleanField('Active',default=True,render_kw ={'checked':''})
+    active = BooleanField('Active')
+    submit = SubmitField('Submit')
+
+
+class BlacklistForm(FlaskForm):
+    clid = StringField('Callerid', validators=[InputRequired(), length(min=9, max=20)])
     active = BooleanField('Active')
     submit = SubmitField('Submit')

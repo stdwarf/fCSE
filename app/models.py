@@ -39,7 +39,10 @@ class Role(db.Model, RoleMixin):
         return self.name
 
 
-
+class Blacklist(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    clid = db.Column(db.String(20), index=True, unique=True)
+    active = db.Column(db.Boolean())
 
 
 class BoolEnum(enum.Enum):

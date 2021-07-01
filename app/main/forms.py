@@ -12,6 +12,6 @@ def timeout():
 
 class CallforwardForm(FlaskForm):
     exten = IntegerField('User', validators=[DataRequired(), NumberRange(1000, 9999)])
-    forward_phone = IntegerField('Mobile', validators=[DataRequired(), NumberRange(80000000000, 89999999999)])
+    forward_phone = IntegerField('Mobile', validators=[DataRequired(), NumberRange(1000, 89999999999), NumberRange(1000, 9999)])
     timeout = SelectField('Timeout', choices=timeout(), default=8)
     submit = SubmitField('Submit')
