@@ -60,5 +60,6 @@ class AlarmForm(FlaskForm):
 
 class BlacklistForm(FlaskForm):
     clid = StringField('Callerid', validators=[InputRequired(), length(min=9, max=20)])
+    ticket = StringField('Ticket', validators=[InputRequired()])
     active = BooleanField('Active')
     submit = SubmitField('Submit')

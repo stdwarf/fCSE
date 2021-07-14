@@ -17,6 +17,28 @@
             <button type="button"  class="btn btn-success float-right"
             data-toggle="modal" data-target="#mymodal">Add New CallerID in Blacklist</button>
         </div>
+            <div class="accordion" id="accordionExample">
+            <div class="card">
+                <div class="card-header" id="headingOne">
+                  <h5 class="mb-0">
+                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                      Напоминание
+                    </button>
+                  </h5>
+                </div>
+
+                <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+                  <div class="card-body">
+                    <table class="table">
+                        <tbody>
+                            <tr><td><strong>Формат CallerID: </strong></td><td>Берем из отчета ACDR</td></tr>
+                            <tr><td><strong>Ticket: </strong></td><td>Указываем причину установки номера в BlackList</td></tr>
+                        </tbody>
+                    </table>
+                  </div>
+                </div>
+            </div>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -33,11 +55,13 @@
             {% endif %}
         {% endwith %}
     </div>
-        <table id="sample_data" class="table table-hover table-striped">
+        <table id="sample_data_blacklist" class="table table-hover table-striped">
                 <thead>
                     <tr>
 {#                        <th>ID</th>#}
                         <th>CallerID</th>
+                        <th>Ticket</th>
+                        <th>Owner</th>
                         <th>Active</th>
                     </tr>
                 </thead>
@@ -45,6 +69,8 @@
                    {% for row in blacklist_data %}
                     <tr>
                         <td>{{row.clid}}</td>
+                        <td>{{row.ticket}}</td>
+                        <td>{{row.owner}}</td>
                         <td>
                         {% if row.active %}
                             <input type="checkbox" name="active" checked="checked", data-active_id="{{ row.id }}", class="checkbox_check">
@@ -53,10 +79,37 @@
 
                          {% endif   %}
                         </td>
+
                         <td>
+
                             <button href="{{ url_for('pbx.blacklist_update', id=row.id )}}" class="btn btn-warning btn-xs blacklist_update" data-toggle="modal"
-                               data-target="#modalBlacklistedit{{row.id}}" data-clid="{{ row.clid }}" data-active="{{ row.active }}">Edit</button>
+                               data-target="#modalBlacklistedit{{row.id}}" data-clid="{{ row.clid }}" data-ticket="{{ row.ticket }}" data-active="{{ row.active }}">Edit</button>
                             <a href={{ url_for('pbx.blacklist_delete', id=row.id)}} class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Delete ?')">Delete</a>
+                            {% if row.history %}
+                            <a class="btn btn-link btn-xs" data-toggle="collapse" href="#multiCollapseExample1" role="button" aria-expanded="false" aria-controls="multiCollapseExample1">History</a>
+                            <div class="row">
+                              <div class="col">
+                                <div class="collapse multi-collapse" id="multiCollapseExample1">
+                                  <div class="card card-body">
+                                        <table class="table">
+                                            <tbody>
+                                            {% for his in row.history.split(';') %}
+                                                {% if his %}
+                                                            <tr><td><strong>Дата: </strong></td><td>{{ his.split(',')[4]|formatdatetime }}</td></tr>
+                                                            <tr><td><strong>CallerID:</strong></td><td>{{ his.split(',')[0] }}</td></tr>
+                                                            <tr><td><strong>Ticket: </strong></td><td>{{ his.split(',')[1] }}</td></tr>
+                                                            <tr><td><strong>Active: </strong></td><td>{{ his.split(',')[2] }}</td></tr>
+                                                            <tr><td><strong>Owner: </strong></td><td>{{ his.split(',')[3]}}</td></tr>
+                                                            <tr><td></td><td></td></tr>
+                                                {% endif %}
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            {% endif %}
                         </td>
                     </tr>
 
@@ -74,6 +127,9 @@
                     <input type="hidden"  name="id" value="">
                     <div class="col-auto modal_clid">
                       {{ wtf.form_field(form.clid) }}
+                    </div>
+                    <div class="col-auto modal_ticket">
+                      {{ wtf.form_field(form.ticket) }}
                     </div>
                     <div class="col-auto modal_active">
                       {{ wtf.form_field(form.active) }}
@@ -103,6 +159,9 @@
            {{ wtf.form_errors(form, hiddens="only") }}
       <div class="col-auto">
           {{ wtf.form_field(form.clid) }}
+      </div>
+      <div class="col-auto">
+          {{ wtf.form_field(form.ticket) }}
       </div>
       <div class="col-auto">
           {{ wtf.form_field(form.active) }}

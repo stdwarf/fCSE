@@ -12,12 +12,29 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/js/bootstrap-editable.js"></script>
 <script type="text/javascript" language="javascript">
 $(document).ready(function(){
-    var dataTable = $('#sample_data').DataTable( {
+    var dataTable = $('#sample_data_fwd').DataTable( {
         "paging":   true,
         "ordering": true,
         "info":     true,
         "lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
         "columns": [
+            null,
+            null,
+            { orderable: false },
+            { orderable: false },
+            { orderable: false },
+            { orderable: false }
+            ]
+    });
+});
+$(document).ready(function(){
+    var dataTable = $('#sample_data_blacklist').DataTable( {
+        "paging":   true,
+        "ordering": true,
+        "info":     true,
+        "lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+        "columns": [
+            null,
             null,
             null,
             { orderable: false },
@@ -56,8 +73,10 @@ $(document).on("click", ".alarm_update", function () {
 });
 $(document).on("click", ".blacklist_update", function () {
      var clid = $(this).data('clid');
+     var ticket = $(this).data('ticket');
      var active = $(this).data('active');
      $(".modal-body #clid").val( clid );
+     $(".modal-body #ticket").val( ticket );
      if (active=="True") {
          $(".modal-body #active").prop("checked", true);
      } else {

@@ -1,5 +1,5 @@
 import enum
-from app import db, login
+from app import db, login, time
 from datetime import datetime
 from flask_security import RoleMixin,  UserMixin
 
@@ -42,6 +42,10 @@ class Role(db.Model, RoleMixin):
 class Blacklist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     clid = db.Column(db.String(20), index=True, unique=True)
+    ticket = db.Column(db.String(100), index=True)
+    owner = db.Column(db.String(254), index=True)
+    added_at = db.Column(db.DateTime, default=time, index=True)
+    history = db.Column(db.Text())
     active = db.Column(db.Boolean())
 
 
@@ -138,11 +142,19 @@ class Callforward(db.Model):
     exten = db.Column(db.String(4), index=True, unique=True)
     forward_phone = db.Column(db.String(11), index=True)
     timeout = db.Column(db.String(4))
+    ticket = db.Column(db.String(100), index=True)
+    owner = db.Column(db.String(254), index=True)
+    added_at = db.Column(db.DateTime, default=time, index=True)
+    history = db.Column(db.Text())
 
-    def __init__(self, exten, forward_phone , timeout):
+    def __init__(self, exten, forward_phone , timeout, ticket, owner, history):
         self.exten = exten
         self.forward_phone = forward_phone
         self.timeout = timeout
+        self.ticket = ticket
+        self.owner = owner
+        self.history = history
+
 
     def __repr__(self):
         return f'<Exten {self.exten}>'

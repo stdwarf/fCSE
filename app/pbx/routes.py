@@ -4,12 +4,18 @@ from datetime import datetime
 from flask import render_template, flash, redirect, url_for, request, session, current_app, jsonify
 from flask_login import login_required, logout_user
 from flask_security import current_user, roles_accepted
-from app import db
+from app import db, time
 from app.main.forms import CallforwardForm
 from app.models import Clid, Ps_auths, Ps_aors, Ps_endpoints, Alarms, Callforward, Blacklist
 from app.pbx import bp
 from app.pbx.forms import ClidForm, ExtenForm, AlarmForm, BlacklistForm
 
+@bp.app_template_filter('formatdatetime')
+def format_datetime(value, format="%d-%m-%Y %H:%M:%S "):
+    if value is None:
+        return ""
+    value = datetime.strptime(value, '%Y-%m-%d %H:%M:%S.%f%z')
+    return value.strftime(format)
 
 @bp.before_request
 def before_request():
@@ -57,8 +63,11 @@ def fwd_insert():
         exten = form.exten.data
         forward_phone = form.forward_phone.data
         timeout = form.timeout.data
-        my_data = Callforward(exten, forward_phone, timeout)
-        db.session.add(my_data)
+        ticket = form.ticket.data
+        owner = current_user.fullname
+        history = f"{exten},{forward_phone},{timeout},{ticket},{owner},{time};"
+        callforward = Callforward(exten=exten, forward_phone=forward_phone, timeout=timeout, ticket=ticket, owner=owner, history=history)
+        db.session.add(callforward)
         db.session.commit()
         flash("Callforward Inserted Successfully")
       else:
@@ -73,10 +82,19 @@ def fwd_insert():
 def fwd_update(id):
     form = CallforwardForm()
     if request.method == 'POST':
-        my_data = Callforward.query.filter_by(id=id).first_or_404()
-        my_data.exten = form.exten.data
-        my_data.forward_phone = form.forward_phone.data
-        my_data.timeout = form.timeout.data
+        callforward = Callforward.query.filter_by(id=id).first_or_404()
+        callforward.exten = form.exten.data
+        callforward.forward_phone = form.forward_phone.data
+        callforward.timeout = form.timeout.data
+        callforward.ticket = form.ticket.data
+        callforward.owner = current_user.fullname
+        b_list = callforward.history.split(';')
+        if len(b_list) > 4:
+                del b_list[0]
+                b_str = ';'.join([str(item) for item in b_list])
+                callforward.history = f"{b_str}{form.exten.data},{form.forward_phone.data},{form.timeout.data},{form.ticket.data},{current_user.fullname},{time};"
+        else:
+            callforward.history = f"{callforward.history}{form.exten.data},{form.forward_phone.data},{form.timeout.data},{form.ticket.data},{current_user.fullname},{time};"
         db.session.commit()
         flash("Callforward Updated Successfully")
         return redirect(url_for('pbx.fwd_index'))
@@ -86,8 +104,8 @@ def fwd_update(id):
 @bp.route('/fwd/delete/<id>/', methods=['GET', 'POST'])
 @roles_accepted('Admin', 'Operator')
 def fwd_delete(id):
-    my_data = Callforward.query.get(id)
-    db.session.delete(my_data)
+    callforward = Callforward.query.get(id)
+    db.session.delete(callforward)
     db.session.commit()
     flash("Callforward Deleted Successfully")
     return redirect(url_for('pbx.fwd_index'))
@@ -305,8 +323,11 @@ def blacklist_insert():
                 flash('Order exist')
                 return redirect(url_for('pbx.blacklist_index'))
             clid = form.clid.data
+            ticket = form.ticket.data
             active = form.active.data
-            blacklist = Blacklist(clid=clid, active=active)
+            owner = current_user.fullname
+            history = f"{clid},{ticket},{active},{owner},{time};"
+            blacklist = Blacklist(clid=clid, ticket=ticket, owner=owner, active=active, history=history)
             db.session.add(blacklist)
             db.session.commit()
             flash("Blacklist Inserted Successfully")
@@ -323,7 +344,16 @@ def blacklist_update(id):
     if request.method == 'POST':
         blacklist = Blacklist.query.filter_by(id=id).first_or_404()
         blacklist.clid = form.clid.data
+        blacklist.ticket = form.ticket.data
         blacklist.active = form.active.data
+        blacklist.owner = current_user.fullname
+        b_list = blacklist.history.split(';')
+        if len(b_list) > 4:
+                del b_list[0]
+                b_str = ';'.join([str(item) for item in b_list])
+                blacklist.history = f"{b_str}{form.clid.data},{form.ticket.data},{form.active.data},{current_user.fullname},{time};"
+        else:
+            blacklist.history = f"{blacklist.history}{form.clid.data},{form.ticket.data},{form.active.data},{current_user.fullname},{time};"
         db.session.commit()
         flash("Blacklist Updated Successfully")
         return redirect(url_for('pbx.blacklist_index'))
@@ -355,6 +385,13 @@ def blacklist_postactive():
     if request.method == 'POST':
         blacklist = Blacklist.query.filter_by(id=activeid).first_or_404()
         blacklist.active = active
+        b_list = blacklist.history.split(';')
+        if len(b_list) > 4:
+                del b_list[0]
+                b_str = ';'.join([str(item) for item in b_list])
+                blacklist.history = f"{b_str}{blacklist.clid},{blacklist.ticket},{blacklist.active},{current_user.fullname},{time};"
+        else:
+            blacklist.history = f"{blacklist.history}{blacklist.clid},{blacklist.ticket},{blacklist.active},{current_user.fullname},{time};"
         db.session.commit()
         flash("Blacklist Updated Successfully")
     return redirect(url_for('pbx.blacklist_index'))

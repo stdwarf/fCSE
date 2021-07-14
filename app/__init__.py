@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+from datetime import datetime, timedelta, timezone
 from logging.handlers import RotatingFileHandler
 import os
 from flask import Flask, session,  request
@@ -10,6 +11,10 @@ from flask_login import LoginManager
 from flask_babelex import Babel
 from flask_security import Security, current_user, SQLAlchemySessionUserDatastore
 from config import Config
+
+timezone_offset = +3.0  # Pacific Standard Time (UTC−08:00)
+tzinfo = timezone(timedelta(hours=timezone_offset))
+time = datetime.now(tzinfo)
 
 db = SQLAlchemy()
 login = LoginManager()

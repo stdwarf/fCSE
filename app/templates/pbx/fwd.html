@@ -17,6 +17,29 @@
             <button type="button"  class="btn btn-success float-right"
             data-toggle="modal" data-target="#mymodal">Add New Forward</button>
         </div>
+            <div class="accordion" id="accordionExample">
+            <div class="card">
+                <div class="card-header" id="headingOne">
+                  <h5 class="mb-0">
+                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                      Напоминание
+                    </button>
+                  </h5>
+                </div>
+
+                <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+                  <div class="card-body">
+                    <table class="table">
+                        <tbody>
+                            <tr><td><strong>User: </strong></td><td>Номер пользователя, для которого устанавливается переадресация в формате XXXX</td></tr>
+                            <tr><td><strong>Forward_phone: </strong></td><td>Номер переадресации в формате 8XXXXXXXXXX или XXXX (если внутренний)</td></tr>
+                            <tr><td><strong>Timeout: </strong></td><td>Время ДО срабатывания переадресации</td></tr>
+                        </tbody>
+                    </table>
+                  </div>
+                </div>
+            </div>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -33,13 +56,15 @@
             {% endif %}
         {% endwith %}
     </div>
-        <table id="sample_data" class="table table-hover table-striped">
+        <table id="sample_data_fwd" class="table table-hover table-striped">
                 <thead>
                     <tr>
 {#                        <th>ID</th>#}
                         <th>User</th>
                         <th>Forward_phone</th>
                         <th>Timeout</th>
+                        <th>Ticket</th>
+                        <th>Owner</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -50,9 +75,37 @@
                         <td>{{row.exten}}</td>
                         <td>{{row.forward_phone}}</td>
                         <td>{{row.timeout}}</td>
+                        <td>{{row.ticket}}</td>
+                        <td>{{row.owner}}</td>
                         <td>
                             <a href={{ url_for('pbx.fwd_update', id=row.id)}} class="btn btn-warning btn-xs" data-toggle="modal" data-target="#modaledit{{row.id}}">Edit</a>
                             <a href={{ url_for('pbx.fwd_delete', id=row.id)}} class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Delete ?')">Delete</a>
+                            {% if row.history %}
+                            <a class="btn btn-link btn-xs" data-toggle="collapse" href="#multiCollapseExample1" role="button" aria-expanded="false" aria-controls="multiCollapseExample1">History</a>
+                            <div class="row">
+                              <div class="col">
+                                <div class="collapse multi-collapse" id="multiCollapseExample1">
+                                  <div class="card card-body">
+                                        <table class="table">
+                                            <tbody>
+                                            {% for his in row.history.split(';') %}
+                                                {% if his %}
+                                                            <tr><td><strong>Дата: </strong></td><td>{{ his.split(',')[5]|formatdatetime }}</td></tr>
+                                                            <tr><td><strong>Exten:</strong></td><td>{{ his.split(',')[0] }}</td></tr>
+                                                            <tr><td><strong>Forward_phone: </strong></td><td>{{ his.split(',')[1] }}</td></tr>
+                                                            <tr><td><strong>Timeout: </strong></td><td>{{ his.split(',')[2] }}</td></tr>
+                                                            <tr><td><strong>Ticket: </strong></td><td>{{ his.split(',')[3] }}</td></tr>
+                                                            <tr><td><strong>Owner: </strong></td><td>{{ his.split(',')[4]}}</td></tr>
+                                                            <tr><td></td><td></td></tr>
+                                                {% endif %}
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            {% endif %}
                         </td>
                     </tr>
 
@@ -75,7 +128,10 @@
           <input type="number" size="11" min=1000 max=89999999999 class="form-control" name="forward_phone" value="{{row.forward_phone}}">
          </div>
          <div class="col-auto">
-          {{ wtf.form_field(form.timeout) }}
+            {{ wtf.form_field(form.timeout) }}
+         </div>
+         <div class="col-auto modal_ticket">
+             {{ wtf.form_field(form.ticket) }}
          </div>
             <div class="modal-footer">
             <button class="btn btn-primary" type="submit">Update</button>
@@ -107,6 +163,9 @@
          </div>
       <div class="col-auto">
           {{ wtf.form_field(form.timeout) }}
+      </div>
+      <div class="col-auto">
+          {{ wtf.form_field(form.ticket) }}
       </div>
       <div class="modal-footer">
         <button type="submit" class="btn btn-primary" >Submit</button>
